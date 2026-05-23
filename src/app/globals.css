@@ -1,49 +1,144 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-html {
-  height: 100%;
-}
-
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --primary: #1a4f8a;
+  --primary-dark: #123968;
+  --primary-light: #e8f0fb;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 * {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+html {
+  scroll-behavior: smooth;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+body {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* PWA safe area için padding */
+.pb-safe {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 4rem);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* Bottom navigation safe area */
+.nav-safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Smooth scroll container */
+.scroll-container {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+/* Input focus ring */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  ring: 0;
+}
+
+/* Skeleton loading animasyonu */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
   }
+
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Talep durumu renkleri */
+.durum-bekliyor {
+  @apply text-amber-700 bg-amber-50 border-amber-200;
+}
+
+.durum-isleniyor {
+  @apply text-blue-700 bg-blue-50 border-blue-200;
+}
+
+.durum-tamamlandi {
+  @apply text-green-700 bg-green-50 border-green-200;
+}
+
+.durum-reddedildi {
+  @apply text-red-700 bg-red-50 border-red-200;
+}
+
+/* Tip renkleri */
+.tip-bilgi {
+  @apply text-blue-700 bg-blue-50;
+}
+
+.tip-istek {
+  @apply text-green-700 bg-green-50;
+}
+
+.tip-sikayet {
+  @apply text-red-700 bg-red-50;
+}
+
+.tip-ihbar {
+  @apply text-pink-700 bg-pink-50;
+}
+
+.tip-oneri {
+  @apply text-amber-700 bg-amber-50;
+}
+
+.tip-tesekkur {
+  @apply text-teal-700 bg-teal-50;
+}
+
+/* Foto yükleme bölgesi */
+.foto-dropzone {
+  @apply border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-colors;
+}
+
+.foto-dropzone:hover,
+.foto-dropzone.dragover {
+  @apply border-primary-500 bg-primary-50;
+}
+
+/* Page transition */
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-enter {
+  animation: fadeSlideIn 0.2s ease-out;
+}
+
+/* e-Devlet butonu */
+.btn-edevlet {
+  @apply flex items-center justify-center gap-3 w-full py-3 px-4 bg-[#E30613] text-white rounded-xl font-medium text-[15px] active:scale-[0.98] transition-transform;
 }
