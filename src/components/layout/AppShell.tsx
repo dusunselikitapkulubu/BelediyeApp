@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
-    Home, FilePlus, ListChecks, User, Bell,
+    Home, FilePlus, ListChecks, User, Bell, Megaphone,
 } from 'lucide-react';
 import { useBildirimStore } from '@/store';
 
@@ -12,6 +12,7 @@ const PUBLIC_ROUTES = ['/giris', '/giris/edevlet-callback', '/offline'];
 const NAV_ITEMS = [
     { href: '/', label: 'Ana Sayfa', icon: Home },
     { href: '/talep', label: 'Yeni Talep', icon: FilePlus },
+    { href: '/sikayetler', label: 'Şikayetler', icon: Megaphone },
     { href: '/taleplerim', label: 'Taleplerim', icon: ListChecks },
     { href: '/profil', label: 'Profil', icon: User },
 ];

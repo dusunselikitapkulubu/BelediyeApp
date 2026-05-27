@@ -2,14 +2,16 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useForm, Controller } from 'react-hook-form';
+import { useSession } from 'next-auth/react';
 import {
-  Info, HandMetal, AlertTriangle, Eye,
-  Lightbulb, Heart, MapPin, User, CheckCircle2, Copy,
+  Info, HandMetal, AlertTriangle, Eye, AlertCircle,
+  Lightbulb, Heart, MapPin, User, CheckCircle2, Copy, Loader2, Mail,
 } from 'lucide-react';
 import { useAuthStore, useTalepStore } from '@/store';
-import { talepAPI } from '@/lib/api';
 import FotoYukleme from '@/components/forms/FotoYukleme';
+import { BELEDIYELER } from '@/lib/belediyeler';
 import toast from 'react-hot-toast';
 import type { TalepTipi, TalepFormValues } from '@/types';
 
@@ -47,6 +49,7 @@ export default function YeniTalepPage() {
   const router = useRouter();
   const { kullanici } = useAuthStore();
   const { addTalep } = useTalepStore();
+  const { data: session } = useSession();
 
   const [adim, setAdim] = useState<1 | 2 | 3>(1);
   const [fotoIds, setFotoIds] = useState<string[]>([]);
@@ -55,6 +58,7 @@ export default function YeniTalepPage() {
 
   const { register, handleSubmit, control, watch, formState: { errors } } = useForm<TalepFormValues>({
     defaultValues: {
+      belediyeId: kullanici?.belediye?.id || 'salihli',
       caddeSokak: kullanici?.adres?.caddeSokak || '',
       disKapiNo: kullanici?.adres?.disKapiNo || '',
       icKapiNo: kullanici?.adres?.icKapiNo || '',
@@ -66,12 +70,52 @@ export default function YeniTalepPage() {
   const onSubmit = async (data: TalepFormValues) => {
     if (!kullanici) return;
     setYukleniyor(true);
+
     try {
-      const talep = await talepAPI.olustur({
+      // E-posta API'sine gönder
+      const emailResponse = await fetch('/api/email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tip: data.tip,
+          belediyeId: data.belediyeId,
+          baslik: data.baslik,
+          detay: data.detay,
+          fotografIds: fotoIds,
+          yerBilgisi: {
+            il: kullanici.adres.il,
+            ilce: kullanici.adres.ilce,
+            mahalle: kullanici.adres.mahalle,
+            caddeSokak: data.caddeSokak,
+            disKapiNo: data.disKapiNo,
+            icKapiNo: data.icKapiNo,
+          },
+          kullaniciBilgileri: {
+            adSoyad: kullanici.adSoyad,
+            telefon: kullanici.telefon,
+            email: kullanici.email || session?.user?.email || '',
+          },
+        }),
+      });
+
+      const emailResult = await emailResponse.json();
+
+      if (!emailResult.success) {
+        throw new Error(emailResult.error || 'E-posta gönderilemedi');
+      }
+
+      // Referans numarasını kaydet
+      setBasariliReferans(emailResult.data.referansNo);
+
+      // Ayrıca yerel veritabanına kaydet
+      const yeniTalep = {
+        id: `local-${Date.now()}`,
+        referansNo: emailResult.data.referansNo,
         tip: data.tip,
+        durum: 'bekliyor' as const,
         baslik: data.baslik,
         detay: data.detay,
-        fotografIds: fotoIds,
+        fotograflar: [],
         yerBilgisi: {
           il: kullanici.adres.il,
           ilce: kullanici.adres.ilce,
@@ -80,20 +124,38 @@ export default function YeniTalepPage() {
           disKapiNo: data.disKapiNo,
           icKapiNo: data.icKapiNo,
         },
+        belediye: kullanici.belediye,
+        kullanici: {
+          adSoyad: kullanici.adSoyad,
+          tcKimlikNo: kullanici.tcKimlikNo,
+          telefon: kullanici.telefon,
+          email: kullanici.email || session?.user?.email || '',
+        },
+        olusturmaTarihi: new Date().toISOString(),
+        guncellemeTarihi: new Date().toISOString(),
+      };
+
+      await fetch('/api/talep', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(yeniTalep),
       });
 
-      addTalep(talep.data);
-      setBasariliReferans(talep.data.referansNo);
+      addTalep(yeniTalep);
       setAdim(3);
-      toast.success('Talebiniz başarıyla iletildi!');
-    } catch {
-      toast.error('Talep gönderilemedi, tekrar deneyin');
+      toast.success('Talebiniz e-posta olarak başarıyla iletildi!');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Talep gönderilemedi, tekrar deneyin';
+      toast.error(errorMessage);
     } finally {
       setYukleniyor(false);
     }
   };
 
   if (!kullanici) return null;
+
+  // Profil eksiklik kontrolü
+  const profilEksik = !kullanici.adSoyad || !kullanici.telefon || !kullanici.tcKimlikNo || !kullanici.adres?.mahalle;
 
   // ── Adım 3: Başarı ──────────────────────────────────────────────────────
   if (adim === 3) {
@@ -102,11 +164,14 @@ export default function YeniTalepPage() {
         <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mb-5">
           <CheckCircle2 size={40} className="text-green-600" />
         </div>
-        <h2 className="text-xl font-bold text-gray-900 mb-2">Talebiniz Alındı!</h2>
-        <p className="text-sm text-gray-500 leading-relaxed mb-6">
-          {kullanici.belediye?.ad} tarafından incelemeye alınacak.<br />
-          Güncellemeler bildirim olarak iletilecektir.
+        <h2 className="text-xl font-bold text-gray-900 mb-2">Talebiniz İletildi!</h2>
+        <p className="text-sm text-gray-500 leading-relaxed mb-2">
+          Talebiniz e-posta ile {kullanici.belediye?.ad || 'belediyeye'} iletildi.
         </p>
+        <div className="flex items-center gap-2 text-xs text-green-600 bg-green-50 rounded-full px-3 py-1.5 mb-6">
+          <Mail size={14} />
+          <span>E-posta başarıyla gönderildi</span>
+        </div>
 
         <div className="w-full bg-gray-50 rounded-2xl p-4 mb-6">
           <p className="text-xs text-gray-400 mb-1">Referans Numaranız</p>
@@ -139,6 +204,25 @@ export default function YeniTalepPage() {
 
   return (
     <div className="px-4 pb-8">
+      {/* Profil eksik uyarısı */}
+      {profilEksik && (
+        <Link
+          href="/profil"
+          className="flex items-start gap-2.5 bg-amber-50 border border-amber-200 rounded-2xl p-3.5 mt-4 mb-1 group hover:bg-amber-100 transition-colors"
+        >
+          <AlertCircle size={18} className="text-amber-600 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-xs font-bold text-amber-800">Profil bilgileriniz eksik</p>
+            <p className="text-[11px] text-amber-600 mt-0.5 leading-relaxed">
+              Şikayet oluşturmadan önce ad soyad, TC kimlik no, telefon ve adres bilgilerinizi profil sayfanızdan doldurunuz.
+            </p>
+            <span className="text-[11px] font-semibold text-amber-700 mt-1 inline-block group-hover:underline">
+              Profili Düzenle →
+            </span>
+          </div>
+        </Link>
+      )}
+
       {/* Adım göstergesi */}
       <div className="flex items-center gap-2 pt-5 mb-6">
         {[1, 2].map((s) => (
@@ -190,6 +274,23 @@ export default function YeniTalepPage() {
             </div>
 
             <div>
+              <label className="block text-sm font-semibold text-gray-800 mb-2">İlgili Belediye</label>
+              <select
+                {...register('belediyeId', { required: 'Belediye seçimi zorunludur' })}
+                className="w-full h-12 px-4 bg-gray-50 border border-gray-200 rounded-xl text-[14px] text-gray-900
+                           focus:border-[#1a4f8a] focus:bg-white transition-colors"
+              >
+                <option value="">Belediye Seçiniz</option>
+                {BELEDIYELER.map((belediye) => (
+                  <option key={belediye.id} value={belediye.id}>
+                    {belediye.ad} ({belediye.il} - {belediye.ilce})
+                  </option>
+                ))}
+              </select>
+              {errors.belediyeId && <p className="text-xs text-red-500 mt-1">{errors.belediyeId.message}</p>}
+            </div>
+
+            <div>
               <label className="block text-sm font-semibold text-gray-800 mb-2">Başlık</label>
               <input
                 {...register('baslik', { required: 'Başlık zorunludur', minLength: { value: 5, message: 'En az 5 karakter' } })}
@@ -232,18 +333,24 @@ export default function YeniTalepPage() {
               <div className="flex items-center gap-2 mb-3">
                 <User size={16} className="text-blue-600" />
                 <span className="text-sm font-semibold text-blue-800">Başvuru Sahibi Bilgileri</span>
-                {kullanici.edevletDogrulandi && (
-                  <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full ml-auto">
-                    e-Devlet ✓
+                {session?.user && (
+                  <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full ml-auto flex items-center gap-1">
+                    <svg width="10" height="10" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
+                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                    </svg>
+                    Google ✓
                   </span>
                 )}
               </div>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 {[
                   ['Ad Soyad', kullanici.adSoyad],
-                  ['TC Kimlik', '•••••' + kullanici.tcKimlikNo?.slice(-4)],
+                  ['TC Kimlik', kullanici.tcKimlikNo ? '•••••' + kullanici.tcKimlikNo?.slice(-4) : '—'],
                   ['Telefon', kullanici.telefon || '—'],
-                  ['E-posta', kullanici.email || '—'],
+                  ['E-posta', kullanici.email || session?.user?.email || '—'],
                 ].map(([label, val]) => (
                   <div key={label}>
                     <p className="text-blue-500">{label}</p>
@@ -324,6 +431,14 @@ export default function YeniTalepPage() {
               <FotoYukleme onChange={setFotoIds} />
             </div>
 
+            {/* E-posta bilgilendirme */}
+            <div className="flex items-center gap-2 bg-blue-50 rounded-xl p-3">
+              <Mail size={16} className="text-blue-500 shrink-0" />
+              <p className="text-[11px] text-blue-600">
+                Gönder butonuna bastığınızda talebiniz otomatik olarak e-posta ile belediyeye iletilecektir.
+              </p>
+            </div>
+
             <div className="flex gap-3">
               <button
                 type="button"
@@ -336,9 +451,19 @@ export default function YeniTalepPage() {
                 type="submit"
                 disabled={yukleniyor}
                 className="flex-2 flex-1 py-3.5 bg-[#1a4f8a] text-white rounded-xl font-semibold
-                           disabled:opacity-60 disabled:cursor-not-allowed"
+                           disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                {yukleniyor ? 'Gönderiliyor...' : 'Gönder ✓'}
+                {yukleniyor ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    <span>Gönderiliyor...</span>
+                  </>
+                ) : (
+                  <>
+                    <Mail size={16} />
+                    <span>Gönder</span>
+                  </>
+                )}
               </button>
             </div>
           </div>

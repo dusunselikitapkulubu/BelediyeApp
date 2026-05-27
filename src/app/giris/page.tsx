@@ -1,70 +1,76 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { Shield, Eye, EyeOff, Building2, Lock, Phone } from 'lucide-react';
-import { getEDevletAuthUrl } from '@/lib/edevlet';
+import { signIn, useSession } from 'next-auth/react';
+import { Building2, Loader2 } from 'lucide-react';
 import { useAuthStore } from '@/store';
 import toast from 'react-hot-toast';
 import type { Kullanici } from '@/types';
 
-interface LoginForm {
-  tcKimlikNo: string;
-  sifre: string;
-}
-
 export default function GirisPage() {
   const router = useRouter();
   const { setKullanici } = useAuthStore();
-  const [sifreGoster, setSifreGoster] = useState(false);
-  const [yukleniyor, setYukleniyor] = useState(false);
+  const [googleYukleniyor, setGoogleYukleniyor] = useState(false);
+  const { data: session } = useSession();
+  const [hataMesaji, setHataMesaji] = useState<string | null>(null);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>();
-
-  // Manuel giriş (demo)
-  const onSubmit = async (data: LoginForm) => {
-    setYukleniyor(true);
-    try {
-      // Gerçek uygulamada API'ye istek gönderilir
-      await new Promise((r) => setTimeout(r, 1200));
-
-      const mockKullanici: Kullanici = {
-        id: '1',
-        adSoyad: 'Ahmet Yılmaz',
-        tcKimlikNo: data.tcKimlikNo,
-        telefon: '0532 123 4567',
-        email: 'ahmet.yilmaz@email.com',
-        authProvider: 'manual',
-        edevletDogrulandi: false,
-        adres: {
-          il: 'Manisa', ilce: 'Salihli',
-          mahalle: 'Cumhuriyet Mah.',
-          caddeSokak: 'Atatürk Cad.',
-          disKapiNo: '12', icKapiNo: '3',
-        },
-        belediye: {
-          id: 'salihli', ad: 'Salihli Belediyesi',
-          il: 'Manisa', ilce: 'Salihli',
-        },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      setKullanici(mockKullanici, 'mock-token-123');
-      toast.success('Giriş başarılı!');
-      router.push('/');
-    } catch {
-      toast.error('Giriş başarısız');
-    } finally {
-      setYukleniyor(false);
+  // Oturum açma hatalarını URL parametrelerinden kontrol et
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const error = urlParams.get('error');
+      if (error) {
+        if (error === 'OAuthSignin') {
+          setHataMesaji('Google giriş isteği başlatılamadı. Client ID ayarlarınızı kontrol edin.');
+        } else if (error === 'OAuthCallback') {
+          setHataMesaji('Google hesabıyla bağlantı kurulurken hata oluştu. Lütfen Client Secret ve Redirect URI ayarlarını kontrol edin.');
+        } else if (error === 'OAuthCreateAccount' || error === 'Callback') {
+          setHataMesaji('Kullanıcı hesabı oluşturulurken veya doğrulanırken bir hata oluştu.');
+        } else {
+          setHataMesaji(`Oturum açılamadı: ${error}`);
+        }
+      }
     }
-  };
+  }, []);
 
-  // e-Devlet yönlendirmesi
-  const eDevletGiris = () => {
-    const url = getEDevletAuthUrl();
-    window.location.href = url;
+  // Eğer zaten Google ile giriş yapmışsa yönlendir
+  if (session?.user) {
+    // Google kullanıcısını local store'a kaydet
+    const googleKullanici: Kullanici = {
+      id: (session.user as { id?: string }).id || 'google-user',
+      adSoyad: session.user.name || 'Google Kullanıcısı',
+      tcKimlikNo: '',
+      telefon: '',
+      email: session.user.email || '',
+      authProvider: 'manual',
+      edevletDogrulandi: false,
+      adres: {
+        il: 'Manisa', ilce: 'Salihli',
+        mahalle: '', caddeSokak: '',
+        disKapiNo: '', icKapiNo: '',
+      },
+      belediye: {
+        id: 'salihli', ad: 'Salihli Belediyesi',
+        il: 'Manisa', ilce: 'Salihli',
+      },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    setKullanici(googleKullanici, 'google-session');
+    router.push('/');
+    return null;
+  }
+
+  // Google ile giriş
+  const googleGiris = async () => {
+    setGoogleYukleniyor(true);
+    try {
+      await signIn('google', { callbackUrl: '/giris' });
+    } catch {
+      toast.error('Google ile giriş başarısız');
+      setGoogleYukleniyor(false);
+    }
   };
 
   return (
@@ -82,89 +88,36 @@ export default function GirisPage() {
       </div>
 
       {/* Form kartı */}
-      <div className="bg-white rounded-t-3xl px-6 pt-8 pb-10">
+      <div className="bg-white rounded-t-3xl px-6 pt-8 pb-10 flex flex-col justify-center min-h-[220px]">
 
-        {/* e-Devlet butonu */}
-        <button onClick={eDevletGiris} className="btn-edevlet mb-6">
-          <Shield size={20} />
-          <span>e-Devlet ile Giriş Yap</span>
+        {/* Hata Mesajı */}
+        {hataMesaji && (
+          <div className="mb-4 p-3.5 bg-red-50 border border-red-100 text-red-600 rounded-xl text-xs leading-relaxed">
+            {hataMesaji}
+          </div>
+        )}
+
+        {/* Google ile giriş butonu */}
+        <button
+          onClick={googleGiris}
+          disabled={googleYukleniyor}
+          className="flex items-center justify-center gap-3 w-full py-3.5 px-4 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-medium text-[15px] active:scale-[0.98] transition-all hover:border-gray-300 hover:shadow-sm disabled:opacity-60 disabled:cursor-not-allowed mb-4"
+        >
+          {googleYukleniyor ? (
+            <Loader2 size={20} className="animate-spin" />
+          ) : (
+            <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+            </svg>
+          )}
+          <span>{googleYukleniyor ? 'Yönlendiriliyor...' : 'Google ile Giriş Yap'}</span>
         </button>
 
-        <div className="flex items-center gap-3 mb-5">
-          <div className="flex-1 h-px bg-gray-200" />
-          <span className="text-xs text-gray-400 font-medium">veya</span>
-          <div className="flex-1 h-px bg-gray-200" />
-        </div>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-
-          {/* TC Kimlik No */}
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1.5">
-              TC Kimlik No
-            </label>
-            <div className="relative">
-              <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                {...register('tcKimlikNo', {
-                  required: 'TC Kimlik No zorunludur',
-                  pattern: { value: /^[0-9]{11}$/, message: '11 haneli TC Kimlik No giriniz' },
-                })}
-                type="tel"
-                inputMode="numeric"
-                maxLength={11}
-                placeholder="12345678901"
-                className="w-full h-12 pl-10 pr-4 bg-gray-50 border border-gray-200 rounded-xl
-                           text-[15px] text-gray-900 focus:border-[#1a4f8a] focus:bg-white transition-colors"
-              />
-            </div>
-            {errors.tcKimlikNo && (
-              <p className="text-xs text-red-500 mt-1">{errors.tcKimlikNo.message}</p>
-            )}
-          </div>
-
-          {/* Şifre */}
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1.5">Şifre</label>
-            <div className="relative">
-              <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                {...register('sifre', { required: 'Şifre zorunludur' })}
-                type={sifreGoster ? 'text' : 'password'}
-                placeholder="••••••••"
-                className="w-full h-12 pl-10 pr-10 bg-gray-50 border border-gray-200 rounded-xl
-                           text-[15px] text-gray-900 focus:border-[#1a4f8a] focus:bg-white transition-colors"
-              />
-              <button
-                type="button"
-                onClick={() => setSifreGoster(!sifreGoster)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400"
-              >
-                {sifreGoster ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-            {errors.sifre && (
-              <p className="text-xs text-red-500 mt-1">{errors.sifre.message}</p>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            disabled={yukleniyor}
-            className="w-full h-12 bg-[#1a4f8a] text-white rounded-xl font-semibold text-[15px]
-                       active:scale-[0.98] transition-transform disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {yukleniyor ? 'Giriş yapılıyor...' : 'Giriş Yap'}
-          </button>
-        </form>
-
-        <p className="text-center text-xs text-gray-400 mt-6">
-          Hesap oluştur veya şifremi unuttum →{' '}
-          <a href="#" className="text-[#1a4f8a] font-medium">Kayıt Ol</a>
-        </p>
-
-        <p className="text-center text-[11px] text-gray-300 mt-4">
-          e-Devlet girişi ile TC kimliğiniz doğrulanır ve tüm bilgileriniz otomatik doldurulur.
+        <p className="text-center text-[11px] text-gray-400 mt-2">
+          Güvenli giriş için Google hesabınızı kullanın.
         </p>
       </div>
     </div>

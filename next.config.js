@@ -18,9 +18,10 @@ const withPWA = require('next-pwa')({
 
 const nextConfig = {
   images: {
-    domains: ['localhost', 'giris.turkiye.gov.tr'],
+    domains: ['localhost', 'giris.turkiye.gov.tr', 'lh3.googleusercontent.com'],
     remotePatterns: [
       { protocol: 'https', hostname: '**.turkiye.gov.tr' },
+      { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
     ],
   },
   experimental: {

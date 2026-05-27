@@ -4,6 +4,7 @@ import './globals.css';
 import { Toaster } from 'react-hot-toast';
 import AppShell from '@/components/layout/AppShell';
 import PushProvider from '@/components/layout/PushProvider';
+import AuthProvider from '@/components/layout/AuthProvider';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
@@ -50,9 +51,11 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
       <body className="bg-gray-50 antialiased">
-        <PushProvider>
-          <AppShell>{children}</AppShell>
-        </PushProvider>
+        <AuthProvider>
+          <PushProvider>
+            <AppShell>{children}</AppShell>
+          </PushProvider>
+        </AuthProvider>
         <Toaster
           position="top-center"
           toastOptions={{

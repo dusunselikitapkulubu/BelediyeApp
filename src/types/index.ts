@@ -162,6 +162,7 @@ export interface PaginatedResponse<T> {
 
 export interface TalepFormValues {
     tip: TalepTipi;
+    belediyeId: string;
     baslik: string;
     detay: string;
     caddeSokak: string;

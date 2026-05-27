@@ -1,0 +1,97 @@
+[
+  {
+    "id": "complaint-1",
+    "referansNo": "BLD-K8S2J9-F3A1",
+    "tip": "sikayet",
+    "durum": "bekliyor",
+    "baslik": "Sokak Lambası Arızası",
+    "detay": "Cumhuriyet Mahallesi Atatürk Caddesi üzerinde bulunan 3 adet sokak lambası yaklaşık bir haftadır yanmıyor. Akşamları sokak çok karanlık oluyor ve güvenlik riski oluşturuyor. Tamir edilmesini talep ediyorum.",
+    "fotograflar": [],
+    "yerBilgisi": {
+      "il": "Manisa",
+      "ilce": "Salihli",
+      "mahalle": "Cumhuriyet Mah.",
+      "caddeSokak": "Atatürk Cad.",
+      "disKapiNo": "45",
+      "icKapiNo": ""
+    },
+    "belediye": {
+      "id": "salihli",
+      "ad": "Salihli Belediyesi",
+      "il": "Manisa",
+      "ilce": "Salihli"
+    },
+    "kullanici": {
+      "adSoyad": "Mehmet Demir",
+      "tcKimlikNo": "12345678902",
+      "telefon": "0532 987 6543",
+      "email": "mehmet.demir@email.com"
+    },
+    "olusturmaTarihi": "2026-05-25T14:30:00.000Z",
+    "guncellemeTarihi": "2026-05-25T14:30:00.000Z"
+  },
+  {
+    "id": "complaint-2",
+    "referansNo": "BLD-M4P8X1-Y7Z2",
+    "tip": "sikayet",
+    "durum": "isleniyor",
+    "baslik": "Çöp Konteyneri Yetersizliği",
+    "detay": "Mithatpaşa Mahallesi 24. Sokak'ta çöp konteynerleri yetersiz kalıyor. Çöpler dışarı taşıyor ve çevreye kötü koku yayılıyor. Yeni bir konteyner konulmasını rica ederim.",
+    "fotograflar": [],
+    "yerBilgisi": {
+      "il": "Manisa",
+      "ilce": "Salihli",
+      "mahalle": "Mithatpaşa Mah.",
+      "caddeSokak": "24. Sokak",
+      "disKapiNo": "12",
+      "icKapiNo": ""
+    },
+    "belediye": {
+      "id": "salihli",
+      "ad": "Salihli Belediyesi",
+      "il": "Manisa",
+      "ilce": "Salihli"
+    },
+    "kullanici": {
+      "adSoyad": "Zeynep Kaya",
+      "tcKimlikNo": "12345678903",
+      "telefon": "0543 123 4567",
+      "email": "zeynep.kaya@email.com"
+    },
+    "olusturmaTarihi": "2026-05-22T09:15:00.000Z",
+    "guncellemeTarihi": "2026-05-22T11:00:00.000Z"
+  },
+  {
+    "id": "complaint-3",
+    "referansNo": "BLD-L2T5H9-W8V4",
+    "tip": "sikayet",
+    "durum": "tamamlandi",
+    "baslik": "Yol Çökmesi ve Çukur",
+    "detay": "Kurtuluş Mahallesi Gençlik Caddesi'ndeki kavşakta derin bir çukur oluşmuş durumda. Araçlar geçerken zarar görüyor ve kaza riski var. Acilen asfaltlama yapılması gerekiyor.",
+    "fotograflar": [],
+    "yerBilgisi": {
+      "il": "Manisa",
+      "ilce": "Salihli",
+      "mahalle": "Kurtuluş Mah.",
+      "caddeSokak": "Gençlik Cad.",
+      "disKapiNo": "8",
+      "icKapiNo": ""
+    },
+    "belediye": {
+      "id": "salihli",
+      "ad": "Salihli Belediyesi",
+      "il": "Manisa",
+      "ilce": "Salihli"
+    },
+    "kullanici": {
+      "adSoyad": "Ali Can",
+      "tcKimlikNo": "12345678904",
+      "telefon": "0555 987 6543",
+      "email": "ali.can@email.com"
+    },
+    "yanit": "Talebiniz üzerine ekiplerimiz caddedeki çukuru kapatmış ve asfaltlama çalışmasını tamamlamıştır. Hassasiyetiniz için teşekkür ederiz.",
+    "olusturmaTarihi": "2026-05-20T10:00:00.000Z",
+    "guncellemeTarihi": "2026-05-21T16:45:00.000Z",
+    "tamamlanmaTarihi": "2026-05-21T16:45:00.000Z"
+  }
+]
