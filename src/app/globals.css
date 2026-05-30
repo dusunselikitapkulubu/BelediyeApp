@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 :root {
-  --primary: #1a4f8a;
-  --primary-dark: #123968;
-  --primary-light: #e8f0fb;
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --primary-light: #eff6ff;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
@@ -21,11 +21,12 @@ html {
 body {
   font-family: var(--font-inter), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  background-color: #f8fafc;
 }
 
 /* PWA safe area için padding */
 .pb-safe {
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 4rem);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 4.5rem);
 }
 
 .pt-safe {
@@ -34,7 +35,7 @@ body {
 
 /* Bottom navigation safe area */
 .nav-safe-bottom {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem);
 }
 
 /* Smooth scroll container */
@@ -49,7 +50,8 @@ input:focus,
 select:focus,
 textarea:focus {
   outline: none;
-  ring: 0;
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
 }
 
 /* Skeleton loading animasyonu */
@@ -64,61 +66,61 @@ textarea:focus {
 }
 
 .skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
   background-size: 1000px 100%;
   animation: shimmer 1.5s infinite;
 }
 
 /* Talep durumu renkleri */
 .durum-bekliyor {
-  @apply text-amber-700 bg-amber-50 border-amber-200;
+  @apply text-amber-700 bg-amber-50 border-amber-200/80;
 }
 
 .durum-isleniyor {
-  @apply text-blue-700 bg-blue-50 border-blue-200;
+  @apply text-blue-700 bg-blue-50 border-blue-200/80;
 }
 
 .durum-tamamlandi {
-  @apply text-green-700 bg-green-50 border-green-200;
+  @apply text-emerald-700 bg-emerald-50 border-emerald-200/80;
 }
 
 .durum-reddedildi {
-  @apply text-red-700 bg-red-50 border-red-200;
+  @apply text-rose-700 bg-rose-50 border-rose-200/80;
 }
 
 /* Tip renkleri */
 .tip-bilgi {
-  @apply text-blue-700 bg-blue-50;
+  @apply text-blue-700 bg-blue-50 border border-blue-100;
 }
 
 .tip-istek {
-  @apply text-green-700 bg-green-50;
+  @apply text-emerald-700 bg-emerald-50 border border-emerald-100;
 }
 
 .tip-sikayet {
-  @apply text-red-700 bg-red-50;
+  @apply text-rose-700 bg-rose-50 border border-rose-100;
 }
 
 .tip-ihbar {
-  @apply text-pink-700 bg-pink-50;
+  @apply text-fuchsia-700 bg-fuchsia-50 border border-fuchsia-100;
 }
 
 .tip-oneri {
-  @apply text-amber-700 bg-amber-50;
+  @apply text-amber-700 bg-amber-50 border border-amber-100;
 }
 
 .tip-tesekkur {
-  @apply text-teal-700 bg-teal-50;
+  @apply text-teal-700 bg-teal-50 border border-teal-100;
 }
 
 /* Foto yükleme bölgesi */
 .foto-dropzone {
-  @apply border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-colors;
+  @apply border-2 border-dashed border-slate-200 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all;
 }
 
 .foto-dropzone:hover,
 .foto-dropzone.dragover {
-  @apply border-primary-500 bg-primary-50;
+  @apply border-blue-400 bg-blue-50/50;
 }
 
 /* Page transition */
@@ -140,5 +142,5 @@ textarea:focus {
 
 /* e-Devlet butonu */
 .btn-edevlet {
-  @apply flex items-center justify-center gap-3 w-full py-3 px-4 bg-[#E30613] text-white rounded-xl font-medium text-[15px] active:scale-[0.98] transition-transform;
+  @apply flex items-center justify-center gap-3 w-full py-3.5 px-4 bg-gradient-to-r from-[#e30613] to-[#c2040e] text-white rounded-xl font-semibold text-[15px] active:scale-[0.98] transition-all shadow-md shadow-red-600/10;
 }

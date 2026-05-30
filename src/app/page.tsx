@@ -70,23 +70,23 @@ export default function AnaSayfa() {
 
       {/* Karşılama */}
       <div className="pt-5 pb-4">
-        <p className="text-sm text-gray-500">Merhaba,</p>
-        <div className="flex items-center justify-between">
+        <p className="text-xs text-slate-400 font-medium uppercase tracking-wider">Merhaba,</p>
+        <div className="flex items-center justify-between mt-0.5">
           <div className="flex items-center gap-2">
             {isGoogle && session?.user?.image && (
               <img
                 src={session.user.image}
                 alt={displayName}
-                className="w-8 h-8 rounded-full"
+                className="w-8 h-8 rounded-full ring-2 ring-blue-50"
                 referrerPolicy="no-referrer"
               />
             )}
-            <h2 className="text-xl font-bold text-gray-900">{displayName}</h2>
+            <h2 className="text-xl font-bold text-slate-800">{displayName}</h2>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             {isGoogle && (
-              <span className="flex items-center gap-1 text-[11px] text-blue-700 bg-blue-50 px-2 py-1 rounded-full">
-                <svg width="10" height="10" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <span className="flex items-center gap-1 text-[10px] font-semibold text-blue-600 bg-blue-50 border border-blue-100 px-2.5 py-0.5 rounded-full">
+                <svg width="10" height="10" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="mr-0.5">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
                   <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
                   <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
@@ -95,18 +95,18 @@ export default function AnaSayfa() {
                 Google
               </span>
             )}
-            <button onClick={handleLogout} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors" title="Çıkış Yap">
+            <button onClick={handleLogout} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all duration-200" title="Çıkış Yap">
               <LogOut size={16} />
             </button>
           </div>
         </div>
-        <div className="flex items-center gap-1 mt-1">
-          <MapPin size={13} className="text-gray-400" />
-          <span className="text-xs text-gray-500">{belediyeAd}</span>
+        <div className="flex items-center gap-1.5 mt-1.5">
+          <MapPin size={13} className="text-slate-400" />
+          <span className="text-xs text-slate-500 font-medium">{belediyeAd}</span>
           {displayEmail && (
             <>
-              <span className="text-gray-300 mx-1">·</span>
-              <span className="text-xs text-gray-400">{displayEmail}</span>
+              <span className="text-slate-300">·</span>
+              <span className="text-xs text-slate-400">{displayEmail}</span>
             </>
           )}
         </div>
@@ -114,34 +114,36 @@ export default function AnaSayfa() {
 
       {/* İstatistik kartları */}
       <div className="grid grid-cols-2 gap-3 mb-5">
-        <div className="bg-blue-50 rounded-2xl p-4">
-          <p className="text-xs text-blue-600 font-medium mb-1">Bekleyen</p>
-          <p className="text-3xl font-bold text-blue-700">{bekleyenSayi}</p>
-          <p className="text-[11px] text-blue-500 mt-1">talep işleniyor</p>
+        <div className="bg-blue-50/50 border border-blue-100/60 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-200">
+          <p className="text-xs text-blue-600 font-bold mb-1">Bekleyen</p>
+          <p className="text-3xl font-black text-blue-600">{bekleyenSayi}</p>
+          <p className="text-[10px] text-blue-500/80 font-medium mt-1">talep işlemde</p>
         </div>
-        <div className="bg-green-50 rounded-2xl p-4">
-          <p className="text-xs text-green-600 font-medium mb-1">Tamamlanan</p>
-          <p className="text-3xl font-bold text-green-700">{tamamlananSayi}</p>
-          <p className="text-[11px] text-green-500 mt-1">talep çözüldü</p>
+        <div className="bg-emerald-50/50 border border-emerald-100/60 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-200">
+          <p className="text-xs text-emerald-600 font-bold mb-1">Tamamlanan</p>
+          <p className="text-3xl font-black text-emerald-600">{tamamlananSayi}</p>
+          <p className="text-[10px] text-emerald-500/80 font-medium mt-1">talep çözüldü</p>
         </div>
       </div>
 
       {/* Yeni talep butonu */}
       <Link href="/talep"
-        className="flex items-center justify-between bg-[#1a4f8a] text-white rounded-2xl p-4 mb-5">
+        className="flex items-center justify-between bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-2xl p-5 mb-5 shadow-lg shadow-blue-500/15 hover:shadow-xl hover:shadow-blue-500/20 active:scale-[0.99] transition-all duration-200">
         <div>
-          <p className="font-semibold text-[15px]">Yeni Talep Oluştur</p>
-          <p className="text-white/70 text-xs mt-0.5">Belediyenize kolayca ulaşın</p>
+          <p className="font-bold text-[16px] tracking-wide">Yeni Talep Oluştur</p>
+          <p className="text-white/80 text-xs mt-1 font-medium">Belediyenize hızlıca ulaşın ve bildirim alın</p>
         </div>
-        <FilePlus size={28} className="text-white/80" />
+        <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-sm">
+          <FilePlus size={22} className="text-white" />
+        </div>
       </Link>
 
       {/* Son talepler */}
       {sonTalepler.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-gray-800 text-[15px]">Son Taleplerim</h3>
-            <Link href="/taleplerim" className="text-xs text-[#1a4f8a] font-medium flex items-center gap-0.5">
+        <div className="space-y-3">
+          <div className="flex items-center justify-between mb-1">
+            <h3 className="font-bold text-slate-800 text-[15px]">Son Taleplerim</h3>
+            <Link href="/taleplerim" className="text-xs text-blue-600 hover:text-blue-700 font-semibold flex items-center gap-0.5 hover:underline">
               Tümü <ChevronRight size={14} />
             </Link>
           </div>
@@ -154,23 +156,23 @@ export default function AnaSayfa() {
                 <Link
                   key={talep.id}
                   href={`/taleplerim/${talep.id}`}
-                  className="flex items-start gap-3 bg-white rounded-2xl p-4 border border-gray-100 active:bg-gray-50 block"
+                  className="flex items-start gap-3 bg-white hover:border-slate-200 hover:shadow-sm rounded-2xl p-4 border border-slate-100 active:bg-slate-50 transition-all duration-200 block"
                 >
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${tip.cls}`}>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${tip.cls}`}>
                         {tip.label}
                       </span>
-                      <span className={`flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full border ${durum.cls}`}>
+                      <span className={`flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border ${durum.cls}`}>
                         {durum.icon} {durum.label}
                       </span>
                     </div>
-                    <p className="text-[13px] font-medium text-gray-800 truncate">{talep.baslik}</p>
-                    <p className="text-[11px] text-gray-400 mt-0.5">
+                    <p className="text-[13px] font-bold text-slate-800 truncate">{talep.baslik}</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5 font-medium">
                       {talep.referansNo} · {formatDistanceToNow(new Date(talep.olusturmaTarihi), { addSuffix: true, locale: tr })}
                     </p>
                   </div>
-                  <ChevronRight size={16} className="text-gray-300 mt-1 shrink-0" />
+                  <ChevronRight size={16} className="text-slate-300 mt-1 shrink-0" />
                 </Link>
               );
             })}
@@ -179,11 +181,11 @@ export default function AnaSayfa() {
       )}
 
       {sonTalepler.length === 0 && (
-        <div className="text-center py-10">
-          <FilePlus size={40} className="text-gray-200 mx-auto mb-3" />
-          <p className="text-sm text-gray-500">Henüz talep oluşturmadınız</p>
+        <div className="text-center py-10 bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
+          <FilePlus size={40} className="text-slate-200 mx-auto mb-3" />
+          <p className="text-sm font-semibold text-slate-600">Henüz talep oluşturmadınız</p>
           <Link href="/talep"
-            className="inline-block mt-4 px-6 py-2.5 bg-[#1a4f8a] text-white rounded-xl text-sm font-medium">
+            className="inline-block mt-4 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-sm font-bold shadow-md shadow-blue-500/10 hover:shadow-lg transition-all duration-200 active:scale-95">
             İlk Talebi Oluştur
           </Link>
         </div>

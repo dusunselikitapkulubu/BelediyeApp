@@ -74,25 +74,25 @@ export default function GirisPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#1a4f8a] to-[#123968] flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-indigo-950 to-slate-900 flex flex-col justify-between">
 
       {/* Üst alan */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 pt-16 pb-8">
-        <div className="w-20 h-20 rounded-2xl bg-white/15 backdrop-blur flex items-center justify-center mb-5">
-          <Building2 size={40} className="text-white" />
+        <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-blue-500 to-indigo-500 flex items-center justify-center mb-6 shadow-xl shadow-blue-500/20 ring-4 ring-white/10">
+          <Building2 size={36} className="text-white" />
         </div>
-        <h1 className="text-3xl font-bold text-white mb-2">BelediyeApp</h1>
-        <p className="text-white/70 text-[15px] text-center leading-relaxed">
+        <h1 className="text-3.5xl font-black tracking-tight text-white mb-2 bg-gradient-to-r from-white via-white to-blue-200 bg-clip-text text-transparent">BelediyeApp</h1>
+        <p className="text-white/70 text-[14px] text-center leading-relaxed font-medium">
           Belediyenize istek, öneri ve şikayetlerinizi<br />kolayca iletin
         </p>
       </div>
 
       {/* Form kartı */}
-      <div className="bg-white rounded-t-3xl px-6 pt-8 pb-10 flex flex-col justify-center min-h-[220px]">
+      <div className="bg-white/95 backdrop-blur-lg border-t border-white/20 rounded-t-[32px] px-6 pt-8 pb-12 flex flex-col justify-center shadow-[0_-12px_40px_rgba(0,0,0,0.15)] min-h-[240px]">
 
         {/* Hata Mesajı */}
         {hataMesaji && (
-          <div className="mb-4 p-3.5 bg-red-50 border border-red-100 text-red-600 rounded-xl text-xs leading-relaxed">
+          <div className="mb-4 p-3.5 bg-red-50 border border-red-100 text-red-600 rounded-xl text-xs leading-relaxed font-medium">
             {hataMesaji}
           </div>
         )}
@@ -101,10 +101,10 @@ export default function GirisPage() {
         <button
           onClick={googleGiris}
           disabled={googleYukleniyor}
-          className="flex items-center justify-center gap-3 w-full py-3.5 px-4 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-medium text-[15px] active:scale-[0.98] transition-all hover:border-gray-300 hover:shadow-sm disabled:opacity-60 disabled:cursor-not-allowed mb-4"
+          className="flex items-center justify-center gap-3 w-full py-3.5 px-4 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-[15px] active:scale-[0.98] transition-all hover:border-slate-300 hover:shadow-sm disabled:opacity-60 disabled:cursor-not-allowed mb-4"
         >
           {googleYukleniyor ? (
-            <Loader2 size={20} className="animate-spin" />
+            <Loader2 size={20} className="animate-spin text-slate-500" />
           ) : (
             <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
@@ -116,7 +116,7 @@ export default function GirisPage() {
           <span>{googleYukleniyor ? 'Yönlendiriliyor...' : 'Google ile Giriş Yap'}</span>
         </button>
 
-        <p className="text-center text-[11px] text-gray-400 mt-2">
+        <p className="text-center text-[11px] text-slate-400 mt-2 font-medium">
           Güvenli giriş için Google hesabınızı kullanın.
         </p>
       </div>

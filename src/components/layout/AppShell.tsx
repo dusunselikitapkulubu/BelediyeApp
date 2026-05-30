@@ -31,19 +31,21 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <div className="flex flex-col min-h-screen max-w-[430px] mx-auto bg-white shadow-sm">
 
             {/* Header */}
-            <header className="sticky top-0 z-40 bg-[#1a4f8a] text-white pt-safe">
+            <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-100 text-slate-800 pt-safe">
                 <div className="flex items-center justify-between px-4 h-14">
-                    <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
-                            <span className="text-white font-bold text-sm">B</span>
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-md shadow-blue-500/20">
+                            <span className="text-white font-black text-sm">B</span>
                         </div>
-                        <span className="font-semibold text-[15px]">BelediyeApp</span>
+                        <span className="font-extrabold text-[15px] bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                            BelediyeApp
+                        </span>
                     </div>
-                    <Link href="/bildirimler" className="relative p-1.5">
-                        <Bell size={22} className="text-white" />
+                    <Link href="/bildirimler" className="relative p-1.5 hover:bg-slate-50 rounded-xl transition-all duration-200">
+                        <Bell size={20} className="text-slate-600" />
                         {okunmamisSayi > 0 && (
-                            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-red-500
-                               text-white text-[10px] font-bold flex items-center justify-center">
+                            <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-rose-500
+                               text-white text-[9px] font-black flex items-center justify-center ring-2 ring-white">
                                 {okunmamisSayi > 9 ? '9+' : okunmamisSayi}
                             </span>
                         )}
@@ -58,23 +60,25 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
             {/* Bottom Navigation */}
             <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px]
-                      bg-white border-t border-gray-100 nav-safe-bottom z-40">
-                <div className="flex">
+                      bg-white/95 backdrop-blur-md border-t border-slate-100/80 nav-safe-bottom z-40 shadow-[0_-8px_30px_rgb(0,0,0,0.03)]">
+                <div className="flex px-2 py-1">
                     {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
                         const active = pathname === href || (href !== '/' && pathname.startsWith(href));
                         return (
                             <Link
                                 key={href}
                                 href={href}
-                                className={`flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors
-                  ${active ? 'text-[#1a4f8a]' : 'text-gray-400'}`}
+                                className={`flex-1 flex flex-col items-center gap-1 py-2 transition-all duration-300 relative
+                                  ${active ? 'text-blue-600 scale-105' : 'text-slate-400 hover:text-slate-600'}`}
                             >
-                                <Icon
-                                    size={22}
-                                    className={active ? 'stroke-[#1a4f8a]' : 'stroke-gray-400'}
-                                    strokeWidth={active ? 2.2 : 1.8}
-                                />
-                                <span className={`text-[10px] font-medium ${active ? 'text-[#1a4f8a]' : 'text-gray-400'}`}>
+                                <div className={`p-1.5 rounded-xl transition-all duration-300 ${active ? 'bg-blue-50 text-blue-600' : 'text-slate-400'}`}>
+                                    <Icon
+                                        size={20}
+                                        className={active ? 'stroke-blue-600' : 'stroke-slate-400'}
+                                        strokeWidth={active ? 2.2 : 1.8}
+                                    />
+                                </div>
+                                <span className={`text-[9px] font-semibold tracking-wide transition-colors ${active ? 'text-blue-700' : 'text-slate-400'}`}>
                                     {label}
                                 </span>
                             </Link>
