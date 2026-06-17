@@ -93,5 +93,36 @@
     "olusturmaTarihi": "2026-05-20T10:00:00.000Z",
     "guncellemeTarihi": "2026-05-21T16:45:00.000Z",
     "tamamlanmaTarihi": "2026-05-21T16:45:00.000Z"
+  },
+  {
+    "id": "local-1781681855969",
+    "referansNo": "BLD-MQHRDIHM-7VQ8",
+    "tip": "bilgi-edinme",
+    "durum": "bekliyor",
+    "baslik": "E-posta kontrolü",
+    "detay": "üzerinde çalıştığım bir uygulamayı test etmek için bu iletiyi oluşturuyorum. Amacım belediyenin bu mesajı görüp görmediğini öğrenmektir.",
+    "fotograflar": [],
+    "yerBilgisi": {
+      "il": "Manisa",
+      "ilce": "Salihli",
+      "mahalle": "zafer mahallesi ",
+      "caddeSokak": "626. sokak",
+      "disKapiNo": "25",
+      "icKapiNo": "3"
+    },
+    "belediye": {
+      "id": "salihli",
+      "ad": "Salihli Belediyesi",
+      "il": "Manisa",
+      "ilce": "Salihli"
+    },
+    "kullanici": {
+      "adSoyad": "orhan acer",
+      "tcKimlikNo": "12345678978",
+      "telefon": "5364958630",
+      "email": "acera.orhan@gmail.com"
+    },
+    "olusturmaTarihi": "2026-06-17T07:37:35.969Z",
+    "guncellemeTarihi": "2026-06-17T07:37:35.969Z"
   }
 ]

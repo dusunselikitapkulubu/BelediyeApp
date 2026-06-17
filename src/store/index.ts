@@ -8,6 +8,7 @@ interface AuthState {
     kullanici: Kullanici | null;
     token: string | null;
     isLoading: boolean;
+    kayitliKullanicilar: Record<string, Kullanici>;
     setKullanici: (k: Kullanici, token: string) => void;
     updateKullanici: (partial: Partial<Kullanici>) => void;
     logout: () => void;
@@ -19,17 +20,44 @@ export const useAuthStore = create<AuthState>()(
             kullanici: null,
             token: null,
             isLoading: false,
-            setKullanici: (kullanici, token) => set({ kullanici, token }),
+            kayitliKullanicilar: {},
+            setKullanici: (kullanici, token) =>
+                set((state) => {
+                    const saved = state.kayitliKullanicilar?.[kullanici.email];
+                    const finalKullanici = saved
+                        ? { ...kullanici, ...saved, email: kullanici.email, id: kullanici.id }
+                        : kullanici;
+                    return {
+                        kullanici: finalKullanici,
+                        token,
+                        kayitliKullanicilar: {
+                            ...state.kayitliKullanicilar,
+                            [kullanici.email]: finalKullanici,
+                        },
+                    };
+                }),
             updateKullanici: (partial) =>
-                set((state) => ({
-                    kullanici: state.kullanici ? { ...state.kullanici, ...partial } : null,
-                })),
+                set((state) => {
+                    if (!state.kullanici) return {};
+                    const guncellenmis = { ...state.kullanici, ...partial };
+                    return {
+                        kullanici: guncellenmis,
+                        kayitliKullanicilar: {
+                            ...state.kayitliKullanicilar,
+                            [state.kullanici.email]: guncellenmis,
+                        },
+                    };
+                }),
             logout: () => set({ kullanici: null, token: null }),
         }),
         {
             name: 'belediye-auth',
             storage: createJSONStorage(() => localStorage),
-            partialize: (state) => ({ kullanici: state.kullanici, token: state.token }),
+            partialize: (state) => ({
+                kullanici: state.kullanici,
+                token: state.token,
+                kayitliKullanicilar: state.kayitliKullanicilar || {},
+            }),
         }
     )
 );

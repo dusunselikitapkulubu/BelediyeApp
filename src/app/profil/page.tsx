@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { useForm } from 'react-hook-form';
-import { User, MapPin, Building2, Save, LogOut, CheckCircle } from 'lucide-react';
+import { User, MapPin, Building2, Save, LogOut, CheckCircle, Edit2 } from 'lucide-react';
 import { useAuthStore } from '@/store';
 import { BELEDIYELER } from '@/lib/belediyeler';
 import toast from 'react-hot-toast';
@@ -28,8 +28,9 @@ export default function ProfilPage() {
   const { kullanici, updateKullanici, logout } = useAuthStore();
   const { data: session } = useSession();
   const [kaydediliyor, setKaydediliyor] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<ProfilFormValues>({
+  const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<ProfilFormValues>({
     defaultValues: {
       adSoyad: kullanici?.adSoyad || '',
       tcKimlikNo: kullanici?.tcKimlikNo || '',
@@ -46,6 +47,25 @@ export default function ProfilPage() {
   });
 
   const secilenBelediyeId = watch('belediyeId');
+
+  // Kullanıcı yüklendiğinde veya değiştiğinde form değerlerini güncelle
+  useEffect(() => {
+    if (kullanici) {
+      reset({
+        adSoyad: kullanici.adSoyad || '',
+        tcKimlikNo: kullanici.tcKimlikNo || '',
+        telefon: kullanici.telefon || '',
+        email: kullanici.email || session?.user?.email || '',
+        belediyeId: kullanici.belediye?.id || 'salihli',
+        il: kullanici.adres?.il || 'Manisa',
+        ilce: kullanici.adres?.ilce || 'Salihli',
+        mahalle: kullanici.adres?.mahalle || '',
+        caddeSokak: kullanici.adres?.caddeSokak || '',
+        disKapiNo: kullanici.adres?.disKapiNo || '',
+        icKapiNo: kullanici.adres?.icKapiNo || '',
+      });
+    }
+  }, [kullanici, session, reset]);
 
   // Belediye değiştiğinde İl ve İlçe bilgilerini otomatik güncelle
   useEffect(() => {
@@ -94,11 +114,12 @@ export default function ProfilPage() {
       };
 
       updateKullanici(guncellenmisBilgiler);
-      
+
       // Simüle gecikme
       await new Promise(r => setTimeout(r, 800));
-      
+
       toast.success('Profil bilgileriniz başarıyla güncellendi!');
+      setIsEditing(false);
     } catch {
       toast.error('Profil güncellenirken hata oluştu.');
     } finally {
@@ -152,7 +173,11 @@ export default function ProfilPage() {
             <input
               {...register('adSoyad', { required: 'Ad soyad zorunludur' })}
               type="text"
-              className="w-full h-11 px-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:border-[#1a4f8a] focus:bg-white transition-colors"
+              readOnly={!isEditing}
+              className={`w-full h-11 px-3.5 border rounded-xl text-sm transition-all duration-200 ${isEditing
+                ? 'bg-white border-gray-200 text-gray-900 focus:border-[#1a4f8a]'
+                : 'bg-gray-50/70 border-gray-100 text-gray-500 cursor-default focus:outline-none'
+                }`}
             />
             {errors.adSoyad && <p className="text-xs text-red-500 mt-1">{errors.adSoyad.message}</p>}
           </div>
@@ -167,7 +192,11 @@ export default function ProfilPage() {
                 })}
                 type="text"
                 maxLength={11}
-                className="w-full h-11 px-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:border-[#1a4f8a] focus:bg-white transition-colors"
+                readOnly={!isEditing}
+                className={`w-full h-11 px-3.5 border rounded-xl text-sm transition-all duration-200 ${isEditing
+                  ? 'bg-white border-gray-200 text-gray-900 focus:border-[#1a4f8a]'
+                  : 'bg-gray-50/70 border-gray-100 text-gray-500 cursor-default focus:outline-none'
+                  }`}
               />
               {errors.tcKimlikNo && <p className="text-xs text-red-500 mt-1">{errors.tcKimlikNo.message}</p>}
             </div>
@@ -178,7 +207,11 @@ export default function ProfilPage() {
                 {...register('telefon', { required: 'Telefon zorunludur' })}
                 type="tel"
                 placeholder="05xx xxx xx xx"
-                className="w-full h-11 px-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:border-[#1a4f8a] focus:bg-white transition-colors"
+                readOnly={!isEditing}
+                className={`w-full h-11 px-3.5 border rounded-xl text-sm transition-all duration-200 ${isEditing
+                  ? 'bg-white border-gray-200 text-gray-900 focus:border-[#1a4f8a]'
+                  : 'bg-gray-50/70 border-gray-100 text-gray-500 cursor-default focus:outline-none'
+                  }`}
               />
               {errors.telefon && <p className="text-xs text-red-500 mt-1">{errors.telefon.message}</p>}
             </div>
@@ -206,7 +239,11 @@ export default function ProfilPage() {
             <label className="block text-xs font-semibold text-gray-500 mb-1">İlgili Belediye</label>
             <select
               {...register('belediyeId', { required: 'Belediye seçimi zorunludur' })}
-              className="w-full h-11 px-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:border-[#1a4f8a] focus:bg-white transition-colors"
+              disabled={!isEditing}
+              className={`w-full h-11 px-3 border rounded-xl text-sm transition-all duration-200 ${isEditing
+                ? 'bg-white border-gray-200 text-gray-900 focus:border-[#1a4f8a] cursor-pointer'
+                : 'bg-gray-50/70 border-gray-100 text-gray-500 cursor-default focus:outline-none appearance-none'
+                }`}
             >
               {BELEDIYELER.map((belediye) => (
                 <option key={belediye.id} value={belediye.id}>
@@ -252,7 +289,11 @@ export default function ProfilPage() {
               {...register('mahalle', { required: 'Mahalle zorunludur' })}
               type="text"
               placeholder="Ör: Cumhuriyet Mah."
-              className="w-full h-11 px-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:border-[#1a4f8a] focus:bg-white transition-colors"
+              readOnly={!isEditing}
+              className={`w-full h-11 px-3.5 border rounded-xl text-sm transition-all duration-200 ${isEditing
+                ? 'bg-white border-gray-200 text-gray-900 focus:border-[#1a4f8a]'
+                : 'bg-gray-50/70 border-gray-100 text-gray-500 cursor-default focus:outline-none'
+                }`}
             />
             {errors.mahalle && <p className="text-xs text-red-500 mt-1">{errors.mahalle.message}</p>}
           </div>
@@ -263,7 +304,11 @@ export default function ProfilPage() {
               {...register('caddeSokak', { required: 'Cadde/Sokak zorunludur' })}
               type="text"
               placeholder="Ör: Atatürk Cad."
-              className="w-full h-11 px-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:border-[#1a4f8a] focus:bg-white transition-colors"
+              readOnly={!isEditing}
+              className={`w-full h-11 px-3.5 border rounded-xl text-sm transition-all duration-200 ${isEditing
+                ? 'bg-white border-gray-200 text-gray-900 focus:border-[#1a4f8a]'
+                : 'bg-gray-50/70 border-gray-100 text-gray-500 cursor-default focus:outline-none'
+                }`}
             />
             {errors.caddeSokak && <p className="text-xs text-red-500 mt-1">{errors.caddeSokak.message}</p>}
           </div>
@@ -275,7 +320,11 @@ export default function ProfilPage() {
                 {...register('disKapiNo', { required: 'Dış kapı no zorunludur' })}
                 type="text"
                 placeholder="Ör: 12"
-                className="w-full h-11 px-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:border-[#1a4f8a] focus:bg-white transition-colors"
+                readOnly={!isEditing}
+                className={`w-full h-11 px-3.5 border rounded-xl text-sm transition-all duration-200 ${isEditing
+                  ? 'bg-white border-gray-200 text-gray-900 focus:border-[#1a4f8a]'
+                  : 'bg-gray-50/70 border-gray-100 text-gray-500 cursor-default focus:outline-none'
+                  }`}
               />
               {errors.disKapiNo && <p className="text-xs text-red-500 mt-1">{errors.disKapiNo.message}</p>}
             </div>
@@ -286,28 +335,73 @@ export default function ProfilPage() {
                 {...register('icKapiNo')}
                 type="text"
                 placeholder="Ör: 3 (İsteğe bağlı)"
-                className="w-full h-11 px-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:border-[#1a4f8a] focus:bg-white transition-colors"
+                readOnly={!isEditing}
+                className={`w-full h-11 px-3.5 border rounded-xl text-sm transition-all duration-200 ${isEditing
+                  ? 'bg-white border-gray-200 text-gray-900 focus:border-[#1a4f8a]'
+                  : 'bg-gray-50/70 border-gray-100 text-gray-500 cursor-default focus:outline-none'
+                  }`}
               />
             </div>
           </div>
         </div>
 
-        {/* Kaydet Butonu */}
-        <button
-          type="submit"
-          disabled={kaydediliyor}
-          className="w-full h-12 bg-[#1a4f8a] hover:bg-[#123968] text-white rounded-xl font-semibold text-sm 
-                     flex items-center justify-center gap-2 shadow-md hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200"
-        >
-          {kaydediliyor ? (
-            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+        {/* Butonlar Grubu */}
+        <div>
+          {isEditing ? (
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  if (kullanici) {
+                    reset({
+                      adSoyad: kullanici.adSoyad || '',
+                      tcKimlikNo: kullanici.tcKimlikNo || '',
+                      telefon: kullanici.telefon || '',
+                      email: kullanici.email || session?.user?.email || '',
+                      belediyeId: kullanici.belediye?.id || 'salihli',
+                      il: kullanici.adres?.il || 'Manisa',
+                      ilce: kullanici.adres?.ilce || 'Salihli',
+                      mahalle: kullanici.adres?.mahalle || '',
+                      caddeSokak: kullanici.adres?.caddeSokak || '',
+                      disKapiNo: kullanici.adres?.disKapiNo || '',
+                      icKapiNo: kullanici.adres?.icKapiNo || '',
+                    });
+                  }
+                  setIsEditing(false);
+                }}
+                disabled={kaydediliyor}
+                className="flex-1 h-12 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 rounded-xl font-semibold text-sm transition-all duration-200"
+              >
+                Vazgeç
+              </button>
+              <button
+                type="submit"
+                disabled={kaydediliyor}
+                className="flex-1 h-12 bg-[#1a4f8a] hover:bg-[#123968] active:scale-[0.99] text-white rounded-xl font-semibold text-sm 
+                           flex items-center justify-center gap-2 shadow-md hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200"
+              >
+                {kaydediliyor ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Save size={16} />
+                    <span>Değişiklikleri Kaydet</span>
+                  </>
+                )}
+              </button>
+            </div>
           ) : (
-            <>
-              <Save size={16} />
-              <span>Değişiklikleri Kaydet</span>
-            </>
+            <button
+              type="button"
+              onClick={() => setIsEditing(true)}
+              className="w-full h-12 bg-[#1a4f8a] hover:bg-[#123968] active:scale-[0.99] text-white rounded-xl font-semibold text-sm 
+                         flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all duration-200"
+            >
+              <Edit2 size={16} />
+              <span>Profil Bilgilerini Düzenle</span>
+            </button>
           )}
-        </button>
+        </div>
       </form>
     </div>
   );
