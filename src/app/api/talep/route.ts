@@ -58,19 +58,7 @@ export async function GET(req: NextRequest) {
         const session = await getServerSession(authOptions);
         let userEmail = session?.user?.email;
 
-        // Eğer Google oturumu yoksa Authorization header'ı kontrol et (Manual/E-devlet girişleri için)
-        if (!userEmail) {
-            const authHeader = req.headers.get('Authorization');
-            if (authHeader && authHeader.startsWith('Bearer ')) {
-                const token = authHeader.substring(7);
-                // Demo/mock token eşleştirmesi
-                if (token === 'mock-token-123') {
-                    userEmail = 'ahmet.yilmaz@email.com';
-                }
-            }
-        }
-
-        // Eğer hala kullanıcı belirlenememişse boş liste dön
+        // Eğer kullanıcı belirlenememişse boş liste dön
         if (!userEmail) {
             return NextResponse.json({
                 items: [],

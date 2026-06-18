@@ -13,7 +13,9 @@ api.interceptors.request.use((config) => {
             const auth = JSON.parse(localStorage.getItem('belediye-auth') || '{}');
             const token = auth?.state?.token;
             if (token) config.headers.Authorization = `Bearer ${token}`;
-        } catch { }
+        } catch (err) {
+            console.error('Token okuma hatası:', err);
+        }
     }
     return config;
 });

@@ -45,7 +45,9 @@ export default function TaleplerimPage() {
     if (!kullanici) { router.push('/giris'); return; }
     talepAPI.liste()
       .then((r) => setTalepler(r.data.items))
-      .catch(() => { });
+      .catch((err) => {
+        console.error('Talepler yüklenirken hata:', err);
+      });
   }, [kullanici, router, setTalepler]);
 
   const filtreliTalepler = talepler.filter((t) => {

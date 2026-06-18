@@ -98,6 +98,18 @@ export function yerelBildirimGoster(
     baslik: string,
     options?: NotificationOptions
 ): void {
+    if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification(baslik, options);
+    }
+}
+
+export interface PushSubscriptionJSON {
+    endpoint: string;
+    keys: {
+        p256dh: string;
+        auth: string;
+    };
+}
     if (Notification.permission === 'granted') {
         new Notification(baslik, {
             icon: '/icons/icon-192x192.png',

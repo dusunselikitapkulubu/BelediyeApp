@@ -68,14 +68,17 @@ interface TalepState {
     talepler: Talep[];
     yukleniyor: boolean;
     setTalepler: (t: Talep[]) => void;
+    setYukleniyor: (y: boolean) => void;
     addTalep: (t: Talep) => void;
     updateTalep: (id: string, partial: Partial<Talep>) => void;
+    removeTalep: (id: string) => void;
 }
 
 export const useTalepStore = create<TalepState>((set) => ({
     talepler: [],
     yukleniyor: false,
-    setTalepler: (talepler) => set({ talepler }),
+    setTalepler: (talepler) => set({ talepler, yukleniyor: false }),
+    setYukleniyor: (yukleniyor) => set({ yukleniyor }),
     addTalep: (talep) =>
         set((state) => ({ talepler: [talep, ...state.talepler] })),
     updateTalep: (id, partial) =>
@@ -83,6 +86,10 @@ export const useTalepStore = create<TalepState>((set) => ({
             talepler: state.talepler.map((t) =>
                 t.id === id ? { ...t, ...partial } : t
             ),
+        })),
+    removeTalep: (id) =>
+        set((state) => ({
+            talepler: state.talepler.filter((t) => t.id !== id),
         })),
 }));
 

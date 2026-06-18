@@ -34,15 +34,18 @@ const DURUM_META: Record<TalepDurumu, { label: string; icon: React.ReactNode; cl
 export default function AnaSayfa() {
   const router = useRouter();
   const { kullanici, logout } = useAuthStore();
-  const { talepler, setTalepler } = useTalepStore();
+  const { talepler, setTalepler, setYukleniyor } = useTalepStore();
   const { data: session } = useSession();
 
   useEffect(() => {
     if (!kullanici && !session?.user) { router.push('/giris'); return; }
+    setYukleniyor(true);
     talepAPI.liste({ sayfa: 1 })
       .then((r) => setTalepler(r.data.items))
-      .catch(() => { });
-  }, [kullanici, session, router, setTalepler]);
+      .catch((err) => {
+        console.error('Talepler yüklenirken hata:', err);
+      });
+  }, [kullanici, session, router, setTalepler, setYukleniyor]);
 
   if (!kullanici && !session?.user) return null;
 

@@ -92,3 +92,23 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         return NextResponse.json({ error: 'Güncelleme başarısız' }, { status: 500 });
     }
 }
+
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+    try {
+        const talepler = readTalepler();
+        const talepIdx = talepler.findIndex(t => t.id === params.id);
+
+        if (talepIdx === -1) {
+            return NextResponse.json({ error: 'Talep bulunamadı' }, { status: 404 });
+        }
+
+        // Talebi listeden çıkar
+        talepler.splice(talepIdx, 1);
+        writeTalepler(talepler);
+
+        return NextResponse.json({ success: true, message: 'Talep silindi' });
+    } catch (error) {
+        console.error('DELETE talep hatası:', error);
+        return NextResponse.json({ error: 'Silme başarısız' }, { status: 500 });
+    }
+}

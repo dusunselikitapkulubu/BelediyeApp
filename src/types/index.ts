@@ -122,6 +122,7 @@ export interface Bildirim {
     talepId?: string;
     talepReferansNo?: string;
     tarih: string;
+    email?: string;
 }
 
 // ─── e-Devlet ─────────────────────────────────────────────────────────────
