@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -169,7 +170,7 @@ export default function TalepDetayPage({ params }: { params: { id: string } }) {
               <div className="grid grid-cols-3 gap-2">
                 {talep.fotograflar.map((foto, index) => (
                   <div key={index} className="aspect-square bg-slate-100 border border-slate-100 rounded-xl overflow-hidden shadow-sm">
-                    <img src={foto.url} alt={foto.dosyaAdi} className="w-full h-full object-cover" />
+                    <Image src={foto.url} alt={foto.dosyaAdi} width={200} height={200} className="w-full h-full object-cover" />
                   </div>
                 ))}
               </div>

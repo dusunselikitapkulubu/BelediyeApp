@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
@@ -77,9 +78,11 @@ export default function AnaSayfa() {
         <div className="flex items-center justify-between mt-0.5">
           <div className="flex items-center gap-2">
             {isGoogle && session?.user?.image && (
-              <img
+              <Image
                 src={session.user.image}
                 alt={displayName}
+                width={32}
+                height={32}
                 className="w-8 h-8 rounded-full ring-2 ring-blue-50"
                 referrerPolicy="no-referrer"
               />
