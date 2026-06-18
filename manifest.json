@@ -9,7 +9,7 @@
     "orientation": "portrait",
     "icons": [
         {
-            "src": "/icons/icon-72x72.png",
+            "src": "/icons/icon72x72.png",
             "sizes": "72x72",
             "type": "image/png"
         },
@@ -24,7 +24,7 @@
             "type": "image/png"
         },
         {
-            "src": "/icons/icon-144x144.png",
+            "src": "/icons/icon144x144.png",
             "sizes": "144x144",
             "type": "image/png"
         },
@@ -34,7 +34,7 @@
             "type": "image/png"
         },
         {
-            "src": "/icons/icon-192x192.png",
+            "src": "/icons/icon192x192.png",
             "sizes": "192x192",
             "type": "image/png",
             "purpose": "maskable"

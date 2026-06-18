@@ -38,9 +38,13 @@ export default function TalepDetayPage({ params }: { params: { id: string } }) {
   const { talepler, updateTalep } = useTalepStore();
   const [talep, setTalep] = useState<Talep | null>(null);
   const [yukleniyor, setYukleniyor] = useState(true);
-  const [kontrolEdiliyor, setKontrolEdiliyor] = useState(false);
-  const [kontrolAsamasi, setKontrolAsamasi] = useState<number>(0);
   const [isMounted, setIsMounted] = useState(false);
+
+  // Durum güncelleme state'leri
+  const [seciliDurum, setSeciliDurum] = useState<TalepDurumu>('bekliyor');
+  const [yanitMetni, setYanitMetni] = useState<string>('');
+  const [duzenlemeModu, setDuzenlemeModu] = useState(false);
+  const [guncellemeBekliyor, setGuncellemeBekliyor] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -56,12 +60,16 @@ export default function TalepDetayPage({ params }: { params: { id: string } }) {
     const localTalep = talepler.find((t) => t.id === id);
     if (localTalep) {
       setTalep(localTalep);
+      setSeciliDurum(localTalep.durum);
+      setYanitMetni(localTalep.yanit || '');
       setYukleniyor(false);
     } else {
       // Bulamazsa API'den çek
       talepAPI.detay(id)
         .then((res) => {
           setTalep(res.data);
+          setSeciliDurum(res.data.durum);
+          setYanitMetni(res.data.yanit || '');
           setYukleniyor(false);
         })
         .catch(() => {
@@ -71,46 +79,27 @@ export default function TalepDetayPage({ params }: { params: { id: string } }) {
     }
   }, [id, kullanici, router, talepler]);
 
-  // E-posta kontrol simülasyonu
-  const handleCheckEmail = async () => {
+  // Talep durumunu güncelle
+  const handleGuncelle = async () => {
     if (!talep) return;
-    setKontrolEdiliyor(true);
-    setKontrolAsamasi(1);
+    setGuncellemeBekliyor(true);
 
     try {
-      // Aşama 1: Bağlantı kuruluyor (600ms)
-      await new Promise((resolve) => setTimeout(resolve, 600));
-      setKontrolAsamasi(2);
+      const response = await talepAPI.guncelle(talep.id, {
+        durum: seciliDurum,
+        yanit: yanitMetni
+      });
 
-      // Aşama 2: Gelen kutusu sorgulanıyor (800ms)
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      setKontrolAsamasi(3);
-
-      // Aşama 3: Veriler güncelleniyor (600ms)
-      await new Promise((resolve) => setTimeout(resolve, 600));
-
-      const response = await talepAPI.checkEmail(talep.id);
-
-      if (response.data.success) {
-        const updatedTalep = response.data.data;
-        // Local state'i ve store'u güncelle
-        setTalep(updatedTalep);
-        updateTalep(talep.id, updatedTalep);
-
-        if (response.data.updated) {
-          toast.success('Belediyeden gelen yanıt başarıyla senkronize edildi ve talep durumu güncellendi!');
-        } else {
-          toast.success('E-posta kutusu kontrol edildi. Yeni bir güncelleme bulunmuyor.');
-        }
-      } else {
-        toast.error('E-posta sorgusu başarısız oldu.');
-      }
+      const updatedTalep = response.data;
+      setTalep(updatedTalep);
+      updateTalep(talep.id, updatedTalep);
+      setDuzenlemeModu(false);
+      toast.success('Talep durumu başarıyla güncellendi!');
     } catch (error) {
       console.error(error);
-      toast.error('Bağlantı hatası. Lütfen tekrar deneyin.');
+      toast.error('Durum güncellenirken hata oluştu.');
     } finally {
-      setKontrolEdiliyor(false);
-      setKontrolAsamasi(0);
+      setGuncellemeBekliyor(false);
     }
   };
 
@@ -215,82 +204,122 @@ export default function TalepDetayPage({ params }: { params: { id: string } }) {
           </div>
         </div>
 
-        {/* E-posta Cevap Kontrolü / Belediye Yanıt Kartı */}
-        {talep.yanit ? (
-          <div className="bg-gradient-to-br from-[#1a4f8a] to-[#123968] border border-blue-900/10 rounded-2xl p-5 text-white shadow-md space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
-              <div className="flex items-center gap-2">
-                <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center text-white shrink-0">
-                  <CheckCircle2 size={18} />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold tracking-wide">Belediye Yanıtı</h4>
-                  <p className="text-[10px] text-white/60 font-medium">E-posta üzerinden alındı</p>
-                </div>
-              </div>
-              <span className="text-[10px] font-bold bg-emerald-500/35 border border-emerald-400/20 text-emerald-300 px-2.5 py-0.5 rounded-full">
-                Sonuçlandı
-              </span>
-            </div>
-
-            <div className="bg-white/10 rounded-xl p-4 border border-white/5">
-              <p className="text-sm leading-relaxed whitespace-pre-wrap font-medium text-slate-100">{talep.yanit}</p>
-            </div>
-
-            {talep.tamamlanmaTarihi && (
-              <p className="text-[10px] text-white/50 text-right font-semibold">
-                Tamamlanma: {isMounted ? new Date(talep.tamamlanmaTarihi).toLocaleDateString('tr-TR', { dateStyle: 'long', timeStyle: 'short' }) : ''}
-              </p>
-            )}
-          </div>
-        ) : (
-          <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-4">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
-                <Mail size={20} />
+        {/* Talep Durum Yönetimi / Belediye Yanıt Kartı */}
+        <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-50">
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-[#1a4f8a] shrink-0">
+                <FileText size={18} />
               </div>
               <div>
-                <h4 className="text-sm font-bold text-gray-800">E-posta Yanıt Kontrolü</h4>
-                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-                  Belediye bu talebinize e-posta üzerinden yanıt göndermiş olabilir. Hemen gelen kutunuzu sorgulayarak talep durumunu güncelleyebilirsiniz.
-                </p>
+                <h4 className="text-sm font-bold text-gray-800">Talep Durumu & Yanıtı</h4>
+                <p className="text-[10px] text-gray-400 font-semibold">Talebin güncel işlem bilgileri</p>
               </div>
             </div>
-
-            {/* Sorgulama Animasyonu / Süreci */}
-            {kontrolEdiliyor && (
-              <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 space-y-3">
-                <div className="flex items-center justify-between text-xs font-bold text-slate-500">
-                  <span className="flex items-center gap-1.5">
-                    <RefreshCw size={12} className="animate-spin text-blue-600" />
-                    {kontrolAsamasi === 1 && 'Gmail API bağlantısı kuruluyor...'}
-                    {kontrolAsamasi === 2 && 'Gelen kutusunda referans no aranıyor...'}
-                    {kontrolAsamasi === 3 && 'Talep veritabanı senkronize ediliyor...'}
-                  </span>
-                  <span>%{Math.round((kontrolAsamasi / 3) * 100)}</span>
-                </div>
-                <div className="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
-                  <div
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 h-1.5 rounded-full transition-all duration-300"
-                    style={{ width: `${(kontrolAsamasi / 3) * 100}%` }}
-                  />
-                </div>
-              </div>
-            )}
-
-            {!kontrolEdiliyor && (
+            {!duzenlemeModu && (
               <button
                 type="button"
-                onClick={handleCheckEmail}
-                className="w-full h-12 bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white rounded-xl font-semibold text-sm 
-                           flex items-center justify-center gap-2 shadow-sm transition-all duration-200"
+                onClick={() => setDuzenlemeModu(true)}
+                className="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100/80 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1"
               >
-                <RefreshCw size={16} />
-                <span>E-postadan Yanıtı Kontrol Et</span>
+                <span>Durumu Düzenle</span>
               </button>
             )}
           </div>
-        )}
+
+          {!duzenlemeModu ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2.5">
+                <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">Mevcut Durum:</span>
+                <span className={`flex items-center gap-1 text-xs font-bold px-3 py-1 rounded-full border ${durum.cls}`}>
+                  {durum.icon} {durum.label}
+                </span>
+              </div>
+
+              {talep.yanit ? (
+                <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 space-y-2">
+                  <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Belediye Yanıtı / Notu</span>
+                  <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{talep.yanit}</p>
+                  {talep.tamamlanmaTarihi && (
+                    <p className="text-[9px] text-gray-400 font-semibold text-right pt-1">
+                      Sonuçlanma: {isMounted ? new Date(talep.tamamlanmaTarihi).toLocaleString('tr-TR', { dateStyle: 'long', timeStyle: 'short' }) : ''}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-xs text-gray-400 font-medium italic">Henüz bir belediye yanıtı veya açıklama eklenmemiş.</p>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-4 pt-1">
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">Yeni Durum Seçin</label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {(Object.keys(DURUM_META) as TalepDurumu[]).map((dKey) => {
+                    const dMeta = DURUM_META[dKey];
+                    const isSelected = seciliDurum === dKey;
+                    return (
+                      <button
+                        key={dKey}
+                        type="button"
+                        onClick={() => setSeciliDurum(dKey)}
+                        className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs font-bold transition-all duration-200 active:scale-95
+                          ${isSelected
+                            ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-600/10'
+                            : 'bg-white border-gray-200 text-gray-600 hover:bg-slate-50/80 hover:border-gray-300'
+                          }`}
+                      >
+                        {dMeta.icon}
+                        <span>{dMeta.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="yanitMetni" className="block text-xs font-bold text-gray-500 uppercase tracking-wider">
+                  Belediye Yanıtı / Çözüm Notu
+                </label>
+                <textarea
+                  id="yanitMetni"
+                  value={yanitMetni}
+                  onChange={(e) => setYanitMetni(e.target.value)}
+                  placeholder="Talebe verilecek yanıtı veya yapılan işlem açıklamasını yazın..."
+                  rows={4}
+                  className="w-full text-sm border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl p-3 outline-none resize-none transition-all duration-200"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 pt-2">
+                <button
+                  type="button"
+                  disabled={guncellemeBekliyor}
+                  onClick={handleGuncelle}
+                  className="flex-1 h-11 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all"
+                >
+                  {guncellemeBekliyor ? (
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <span>Kaydet</span>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  disabled={guncellemeBekliyor}
+                  onClick={() => {
+                    setSeciliDurum(talep.durum);
+                    setYanitMetni(talep.yanit || '');
+                    setDuzenlemeModu(false);
+                  }}
+                  className="px-4 h-11 bg-slate-100 hover:bg-slate-200 disabled:opacity-50 text-slate-700 rounded-xl font-bold text-xs transition-all"
+                >
+                  İptal
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

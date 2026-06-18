@@ -44,11 +44,8 @@ export const talepAPI = {
 
     olustur: (data: TalepOlusturDTO) => api.post<Talep>('/talep', data),
 
-    guncelle: (id: string, data: Partial<TalepOlusturDTO>) =>
+    guncelle: (id: string, data: Partial<Talep>) =>
         api.patch<Talep>(`/talep/${id}`, data),
-
-    checkEmail: (id: string) =>
-        api.post<{ success: boolean; updated: boolean; data: Talep }>(`/talep/${id}`, { action: 'check-email' }),
 };
 
 export const profilAPI = {
