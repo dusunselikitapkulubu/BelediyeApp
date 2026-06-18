@@ -25,6 +25,10 @@ export async function POST(req: NextRequest) {
             );
         }
 
+        // Bu noktadan sonra session.user.email garantili — kolayca erişmek için değişkene alalım
+        const userEmail = session.user.email;
+        const userName = session.user.name ?? '';
+
         const body = await req.json();
         const { tip, belediyeId, baslik, detay, yerBilgisi, kullaniciBilgileri } = body;
 
@@ -46,8 +50,6 @@ export async function POST(req: NextRequest) {
                 { status: 400 }
             );
         }
-
-
 
         const tipLabel = TIP_LABEL[tip] || tip;
         const tarih = new Date().toLocaleString('tr-TR', {
@@ -113,11 +115,13 @@ export async function POST(req: NextRequest) {
                 <div class="section-body">
                     <div class="field">
                         <div class="field-label">Ad Soyad</div>
-                        <div class="field-value">${kullaniciBilgileri?.adSoyad || session.user.name || '—'}</div>
+                        <!-- FIX: userName değişkeni kullan -->
+                        <div class="field-value">${kullaniciBilgileri?.adSoyad || userName || '—'}</div>
                     </div>
                     <div class="field">
                         <div class="field-label">E-posta</div>
-                        <div class="field-value">${session.user.email}</div>
+                        <!-- FIX: userEmail değişkeni kullan -->
+                        <div class="field-value">${userEmail}</div>
                     </div>
                     <div class="field">
                         <div class="field-label">Telefon</div>
@@ -160,10 +164,11 @@ export async function POST(req: NextRequest) {
 
         if (isGoogleUser) {
             const accessToken = (session as any).accessToken;
-            
+
             // Gmail API için MIME mesajı
+            // FIX: userName ve userEmail değişkenlerini kullan
             const mimeMessage = [
-                `From: "${session.user.name}" <${session.user.email}>`,
+                `From: "${userName}" <${userEmail}>`,
                 `To: ${hedefAdres}`,
                 `Subject: =?utf-8?B?${Buffer.from(`[BelediyeApp] ${belediyeAd} - ${tipLabel}: ${baslik}`).toString('base64')}?=`,
                 'MIME-Version: 1.0',
@@ -209,7 +214,8 @@ export async function POST(req: NextRequest) {
                 to: hedefAdres,
                 subject: `[BelediyeApp] ${belediyeAd} - ${tipLabel}: ${baslik}`,
                 html: htmlContent,
-                replyTo: session.user.email,
+                // FIX: userEmail değişkeni kullan
+                replyTo: userEmail,
             });
         }
 

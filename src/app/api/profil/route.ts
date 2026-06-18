@@ -46,7 +46,8 @@ export async function GET(req: NextRequest) {
 
         const tumKullanicilar = readKullanicilar();
         const kullanici = tumKullanicilar.find(
-            (k) => k.email?.toLowerCase() === session.user.email?.toLowerCase()
+            // FIX: session.user?.email (optional chaining)
+            (k) => k.email?.toLowerCase() === session.user?.email?.toLowerCase()
         );
 
         if (!kullanici) {
@@ -73,7 +74,8 @@ export async function PATCH(req: NextRequest) {
         const body = await req.json();
         const tumKullanicilar = readKullanicilar();
         const kullaniciIdx = tumKullanicilar.findIndex(
-            (k) => k.email?.toLowerCase() === session.user.email?.toLowerCase()
+            // FIX: session.user?.email (optional chaining)
+            (k) => k.email?.toLowerCase() === session.user?.email?.toLowerCase()
         );
 
         if (kullaniciIdx === -1) {

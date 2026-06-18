@@ -57,7 +57,8 @@ export async function PATCH(
         const bildirim = tumBildirimler[bildirimIdx];
 
         // Kullanıcı sadece kendi bildirimlerini işaretleyebilir
-        if (bildirim.email && bildirim.email !== session.user.email) {
+        // FIX: session.user?.email (optional chaining)
+        if (bildirim.email && bildirim.email !== session.user?.email) {
             return NextResponse.json(
                 { error: 'Bu işlemi yapamazsınız' },
                 { status: 403 }

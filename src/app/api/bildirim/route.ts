@@ -45,10 +45,11 @@ export async function GET(req: NextRequest) {
         }
 
         const tumBildirimler = readBildirimler();
-        
+
         // Kullanıcıya ait bildirimleri filtrele
         const kullaniciBindirimler = tumBildirimler.filter(
-            (b) => !b.email || b.email === session.user.email
+            // FIX: session.user?.email (optional chaining)
+            (b) => !b.email || b.email === session.user?.email
         );
 
         return NextResponse.json(kullaniciBindirimler);
@@ -87,7 +88,8 @@ export async function POST(req: NextRequest) {
             talepId: talepId || undefined,
             talepReferansNo: talepReferansNo || undefined,
             tarih: new Date().toISOString(),
-            email: session.user.email,
+            // FIX: session.user.email garantili (üstte kontrol edildi), non-null assertion ekle
+            email: session.user.email!,
         };
 
         const tumBildirimler = readBildirimler();
@@ -119,7 +121,8 @@ export async function PATCH(req: NextRequest) {
         if (action === 'hepsini-okundu') {
             // Tüm bildirimleri okundu olarak işaretle
             const guncellenmis = tumBildirimler.map((b) =>
-                !b.email || b.email === session.user.email
+                // FIX: session.user?.email (optional chaining)
+                !b.email || b.email === session.user?.email
                     ? { ...b, okundu: true }
                     : b
             );

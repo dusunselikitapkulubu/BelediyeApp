@@ -110,14 +110,6 @@ export interface PushSubscriptionJSON {
         auth: string;
     };
 }
-    if (Notification.permission === 'granted') {
-        new Notification(baslik, {
-            icon: '/icons/icon-192x192.png',
-            badge: '/icons/badge-72x72.png',
-            ...options,
-        });
-    }
-}
 
 /**
  * Sunucu tarafı: Web Push gönder (API route'dan çağrılır)
