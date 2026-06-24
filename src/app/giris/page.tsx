@@ -34,8 +34,11 @@ export default function GirisPage() {
     }
   }, []);
 
-  // Eğer zaten Google ile giriş yapmışsa yönlendir
-  if (session?.user) {
+  // Eğer zaten Google ile giriş yapmışsa local store'a kaydet ve yönlendir.
+  // Side-effect olduğu için render sırasında değil useEffect içinde çalıştırılır.
+  useEffect(() => {
+    if (!session?.user) return;
+
     // Google kullanıcısını local store'a kaydet
     const googleKullanici: Kullanici = {
       id: (session.user as { id?: string }).id || 'google-user',
@@ -59,7 +62,15 @@ export default function GirisPage() {
     };
     setKullanici(googleKullanici, 'google-session');
     router.push('/');
-    return null;
+  }, [session, setKullanici, router]);
+
+  // Oturum açıkken giriş formunu göstermeden yönlendirme beklenir
+  if (session?.user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-indigo-950 to-slate-900 flex items-center justify-center">
+        <Loader2 size={28} className="animate-spin text-white/70" />
+      </div>
+    );
   }
 
   // Google ile giriş
